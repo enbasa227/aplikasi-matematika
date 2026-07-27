@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator & Analisis Performa Mesin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: Aplikasi ini dirancang sebagai dashboard interaktif satu halaman dengan empat bagian utama: Kalkulator CC, Simulator Modifikasi, Analisis Karakter Mesin, dan Glosarium. Struktur ini dipilih untuk mengubah pengalaman belajar pasif (membaca) menjadi aktif (mencoba). Pengguna pertama kali belajar cara menghitung (Kalkulator), kemudian bereksperimen dengan dampak perubahan (Simulator), memahami implikasi teknisnya (Analisis), dan dapat merujuk istilah kapan saja (Glosarium). Alur ini logis, dari dasar ke lanjutan, dan memaksimalkan keterlibatan serta pemahaman siswa SMK Ototmotif. -->
+    <!-- Visualization & Content Choices: 1. Kalkulator CC: Tujuannya adalah untuk menginformasikan dan memberikan alat hitung. Menggunakan input slider dan angka untuk interaksi langsung. Ini membuat rumus menjadi 'hidup'. (Vanilla JS). 2. Simulator Modifikasi: Tujuannya membandingkan dampak 'Bore Up' vs 'Stroke Up'. Menggunakan Bar Chart dinamis dari Chart.js karena visualisasi perbandingan sangat efektif untuk menunjukkan perbedaan dampak yang signifikan, yang merupakan inti dari konsep eksponen dalam rumus. Slider memberikan kontrol langsung atas perbandingan. (Chart.js, Vanilla JS). 3. Tabel Analisis: Tujuannya mengorganisir informasi komparatif. Tabel HTML sederhana adalah cara paling jelas dan standar untuk menyajikan data perbandingan fitur. (HTML/Tailwind). 4. Glosarium: Tujuannya mengorganisir definisi. Menggunakan UI akordeon untuk menyembunyikan detail, menjaga antarmuka tetap bersih dan fokus. (Vanilla JS). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #fb923c;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #fb923c;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-20">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-orange-500">⚙️ Analisis Performa Mesin</h1>
+            <div class="hidden md:flex space-x-6 text-sm font-medium">
+                <a href="#kalkulator" class="text-stone-600 hover:text-orange-500 transition">Kalkulator CC</a>
+                <a href="#simulator" class="text-stone-600 hover:text-orange-500 transition">Simulator Modifikasi</a>
+                <a href="#analisis" class="text-stone-600 hover:text-orange-500 transition">Analisis Karakter</a>
+                <a href="#glosarium" class="text-stone-600 hover:text-orange-500 transition">Glosarium</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section id="intro" class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Dari Rumus Menjadi Tenaga</h2>
+            <p class="max-w-3xl mx-auto text-stone-600">Selamat datang, mekanik masa depan! Aplikasi ini adalah "kunci inggris" digital Anda untuk memahami bagaimana matematika, khususnya konsep eksponen, menjadi jantung dari performa mesin. Mari kita bongkar rahasia di balik Kapasitas Mesin (CC).</p>
+        </section>
+
+        <!-- Section 1: Kalkulator CC Interaktif -->
+        <section id="kalkulator" class="mb-16 p-6 md:p-8 bg-white rounded-xl shadow-lg scroll-mt-20">
+            <h3 class="text-2xl font-bold mb-2">1. Kalkulator Kapasitas Mesin (CC)</h3>
+            <p class="text-stone-600 mb-6">Gunakan alat ini untuk menghitung CC mesin secara presisi. Geser slider atau masukkan angka Bore dan Stroke untuk melihat hasilnya secara langsung. Ini adalah langkah pertama untuk memahami "seberapa besar" sebuah mesin.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <div class="mb-6">
+                        <label for="bore" class="block font-medium mb-2">Bore / Diameter Piston (mm)</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" id="bore-slider" min="40" max="80" value="52.4" step="0.1" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer range-lg accent-orange-500">
+                            <input type="number" id="bore-input" min="40" max="80" value="52.4" step="0.1" class="w-24 p-2 border border-stone-300 rounded-md text-center font-semibold">
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label for="stroke" class="block font-medium mb-2">Stroke / Langkah Piston (mm)</label>
+                        <div class="flex items-center space-x-4">
+                             <input type="range" id="stroke-slider" min="40" max="80" value="57.9" step="0.1" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer range-lg accent-orange-500">
+                            <input type="number" id="stroke-input" min="40" max="80" value="57.9" step="0.1" class="w-24 p-2 border border-stone-300 rounded-md text-center font-semibold">
+                        </div>
+                    </div>
+                     <div class="flex space-x-2">
+                        <button id="preset-supra" class="bg-stone-200 hover:bg-stone-300 text-stone-700 font-medium py-2 px-4 rounded-lg transition text-sm">Set: Supra X 125</button>
+                    </div>
+                </div>
+                <div class="bg-orange-500 text-white p-8 rounded-lg text-center flex flex-col justify-center items-center h-full">
+                    <h4 class="text-xl font-medium mb-2 opacity-80">Kapasitas Mesin</h4>
+                    <div class="text-6xl font-bold">
+                        <span id="cc-result">124.86</span> <span class="text-3xl opacity-90">CC</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Simulator Modifikasi -->
+        <section id="simulator" class="mb-16 p-6 md:p-8 bg-white rounded-xl shadow-lg scroll-mt-20">
+            <h3 class="text-2xl font-bold mb-2">2. Simulator Modifikasi: Bore Up vs Stroke Up</h3>
+            <p class="text-stone-600 mb-6">Di sinilah kekuatan eksponen terlihat! Mulai dari spek standar, coba naikkan Bore dan Stroke dengan nilai yang sama. Perhatikan grafik untuk melihat mana yang memberikan peningkatan CC paling dramatis dan pahami mengapa "Bore Up" menjadi andalan untuk upgrade performa.</p>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 flex flex-col space-y-6">
+                    <div>
+                        <h4 class="font-semibold text-lg mb-3">Spek Dasar (Supra X 125)</h4>
+                        <div class="flex justify-between p-3 bg-stone-100 rounded-md">
+                            <span class="font-medium">Bore:</span><span id="base-bore-display">52.4 mm</span>
+                        </div>
+                         <div class="flex justify-between p-3 bg-stone-100 rounded-md mt-2">
+                            <span class="font-medium">Stroke:</span><span id="base-stroke-display">57.9 mm</span>
+                        </div>
+                         <div class="flex justify-between p-3 bg-orange-100 text-orange-800 rounded-md mt-2">
+                            <span class="font-bold">CC Standar:</span><span id="base-cc-display" class="font-bold">124.86 CC</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="mod-slider" class="block font-medium mb-2">Tingkatkan Bore / Stroke (mm)</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" id="mod-slider" min="0" max="10" value="5.0" step="0.1" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer range-lg accent-orange-500">
+                            <span id="mod-value-display" class="font-semibold text-lg w-16 text-center">5.0</span>
+                        </div>
+                    </div>
+                    <div id="mod-summary" class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <div class="chart-container mx-auto max-w-3xl">
+                        <canvas id="modChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Analisis Karakter Mesin -->
+        <section id="analisis" class="mb-16 p-6 md:p-8 bg-white rounded-xl shadow-lg scroll-mt-20">
+             <h3 class="text-2xl font-bold mb-2">3. Analisis Karakter Mesin</h3>
+             <p class="text-stone-600 mb-6">Menaikkan CC bukan hanya soal angka, tapi juga tentang karakter. Memilih antara "Bore Up" atau "Stroke Up" akan menentukan di mana mesin akan terasa paling bertenaga. Tabel ini membandingkan keduanya untuk membantu mekanik merancang modifikasi sesuai kebutuhan pelanggan.</p>
+             <div class="overflow-x-auto">
+                 <table class="w-full text-left border-collapse">
+                     <thead>
+                         <tr class="bg-stone-100">
+                             <th class="p-4 font-semibold border-b border-stone-200">Fitur</th>
+                             <th class="p-4 font-semibold border-b border-stone-200">Bore Up (Overbore)</th>
+                             <th class="p-4 font-semibold border-b border-stone-200">Stroke Up (Underbore)</th>
+                         </tr>
+                     </thead>
+                     <tbody class="text-stone-700">
+                         <tr>
+                             <td class="p-4 border-b border-stone-200 font-medium">Karakter Tenaga</td>
+                             <td class="p-4 border-b border-stone-200">Tenaga maksimal di RPM tinggi. Cocok untuk sirkuit/drag race.</td>
+                             <td class="p-4 border-b border-stone-200">Torsi besar di RPM rendah-menengah. Cocok untuk harian/tanjakan.</td>
+                         </tr>
+                         <tr>
+                             <td class="p-4 border-b border-stone-200 font-medium">Kecepatan Piston</td>
+                             <td class="p-4 border-b border-stone-200">Lebih rendah, aman untuk putaran mesin sangat tinggi.</td>
+                             <td class="p-4 border-b border-stone-200">Lebih tinggi, ada batas aman RPM agar mesin awet.</td>
+                         </tr>
+                         <tr>
+                             <td class="p-4 border-b border-stone-200 font-medium">Contoh Motor</td>
+                             <td class="p-4 border-b border-stone-200">MotoGP, Supersport (Honda CBR250RR, Yamaha R25).</td>
+                             <td class="p-4 border-b border-stone-200">Cruiser (Harley-Davidson), motor trail.</td>
+                         </tr>
+                          <tr>
+                             <td class="p-4 font-medium">Alasan Teknis</td>
+                             <td class="p-4">Diameter besar memungkinkan klep lebih besar, efisien di RPM tinggi.</td>
+                             <td class="p-4">Langkah panjang memberi torsi (gaya ungkit) lebih kuat di RPM rendah.</td>
+                         </tr>
+                     </tbody>
+                 </table>
+             </div>
+        </section>
+
+        <!-- Section 4: Glosarium -->
+        <section id="glosarium" class="mb-16 p-6 md:p-8 bg-white rounded-xl shadow-lg scroll-mt-20">
+            <h3 class="text-2xl font-bold mb-2">4. Glosarium & Rumus Kunci</h3>
+            <p class="text-stone-600 mb-6">Gunakan bagian ini untuk mengingat kembali istilah-istilah penting dan rumus utama yang menjadi dasar dari semua perhitungan kita.</p>
+            <div class="space-y-4">
+                <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                    <h4 class="font-bold text-lg text-orange-800">Rumus Kunci Kapasitas Mesin (CC)</h4>
+                    <p class="text-lg font-mono text-center my-2 bg-white p-2 rounded">CC = (π × (Bore/2)² × Stroke) / 1000</p>
+                </div>
+                <!-- Accordion items -->
+                <div class="accordion-item">
+                    <button class="accordion-header flex justify-between items-center w-full p-4 bg-stone-100 hover:bg-stone-200 rounded-lg transition">
+                        <span class="font-semibold">Bore</span>
+                        <span class="transform transition-transform text-orange-500 font-bold text-xl">+</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 bg-stone-50 rounded-b-lg">
+                        <p>Diameter atau garis tengah lubang silinder, biasanya dalam satuan milimeter (mm).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-header flex justify-between items-center w-full p-4 bg-stone-100 hover:bg-stone-200 rounded-lg transition">
+                        <span class="font-semibold">Stroke</span>
+                        <span class="transform transition-transform text-orange-500 font-bold text-xl">+</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 bg-stone-50 rounded-b-lg">
+                        <p>Jarak total yang ditempuh piston saat bergerak dari titik terendah (TMB) ke titik tertinggi (TMA) di dalam silinder, dalam milimeter (mm).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-header flex justify-between items-center w-full p-4 bg-stone-100 hover:bg-stone-200 rounded-lg transition">
+                        <span class="font-semibold">Eksponen (Pangkat)</span>
+                         <span class="transform transition-transform text-orange-500 font-bold text-xl">+</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 bg-stone-50 rounded-b-lg">
+                        <p>Operasi matematika untuk perkalian berulang. Dalam rumus CC, pengaruhnya sangat besar karena nilai Bore (melalui jari-jari) dipangkatkan dua (r²).</p>
+                    </div>
+                </div>
+                 <div class="accordion-item">
+                    <button class="accordion-header flex justify-between items-center w-full p-4 bg-stone-100 hover:bg-stone-200 rounded-lg transition">
+                        <span class="font-semibold">Korter (Reboring)</span>
+                         <span class="transform transition-transform text-orange-500 font-bold text-xl">+</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 bg-stone-50 rounded-b-lg">
+                        <p>Proses memperbesar diameter lubang silinder di bengkel bubut agar sesuai dengan piston baru yang lebih besar.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <footer class="bg-stone-800 text-white mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-sm">
+            <p>&copy; 2025 Aplikasi Pembelajaran Kontekstual TSM. Dibuat untuk pendidikan.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const PI = 3.14159;
+
+            function calculateCC(bore, stroke) {
+                if (bore <= 0 || stroke <= 0) return 0;
+                const radius = bore / 2;
+                const volumeMM3 = PI * (radius * radius) * stroke;
+                return volumeMM3 / 1000;
+            }
+
+            const boreSlider = document.getElementById('bore-slider');
+            const boreInput = document.getElementById('bore-input');
+            const strokeSlider = document.getElementById('stroke-slider');
+            const strokeInput = document.getElementById('stroke-input');
+            const ccResult = document.getElementById('cc-result');
+            const presetSupra = document.getElementById('preset-supra');
+
+            function updateCalculator() {
+                const bore = parseFloat(boreInput.value);
+                const stroke = parseFloat(strokeInput.value);
+                const cc = calculateCC(bore, stroke);
+                ccResult.textContent = cc.toFixed(2);
+            }
+
+            boreSlider.addEventListener('input', (e) => {
+                boreInput.value = e.target.value;
+                updateCalculator();
+            });
+            boreInput.addEventListener('input', (e) => {
+                boreSlider.value = e.target.value;
+                updateCalculator();
+            });
+            strokeSlider.addEventListener('input', (e) => {
+                strokeInput.value = e.target.value;
+                updateCalculator();
+            });
+            strokeInput.addEventListener('input', (e) => {
+                strokeSlider.value = e.target.value;
+                updateCalculator();
+            });
+            presetSupra.addEventListener('click', () => {
+                boreInput.value = 52.4;
+                boreSlider.value = 52.4;
+                strokeInput.value = 57.9;
+                strokeSlider.value = 57.9;
+                updateCalculator();
+            });
+
+            const baseBore = 52.4;
+            const baseStroke = 57.9;
+            const baseCC = calculateCC(baseBore, baseStroke);
+
+            const modSlider = document.getElementById('mod-slider');
+            const modValueDisplay = document.getElementById('mod-value-display');
+            const modSummary = document.getElementById('mod-summary');
+            
+            document.getElementById('base-bore-display').textContent = `${baseBore.toFixed(1)} mm`;
+            document.getElementById('base-stroke-display').textContent = `${baseStroke.toFixed(1)} mm`;
+            document.getElementById('base-cc-display').textContent = `${baseCC.toFixed(2)} CC`;
+
+
+            const ctx = document.getElementById('modChart').getContext('2d');
+            const modChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['CC Standar', 'Hasil Bore Up', 'Hasil Stroke Up'],
+                    datasets: [{
+                        label: 'Kapasitas Mesin (CC)',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(120, 113, 108, 0.6)', // stone-500
+                            'rgba(249, 115, 22, 0.6)', // orange-500
+                            'rgba(14, 165, 233, 0.6)'  // sky-500
+                        ],
+                        borderColor: [
+                            'rgba(120, 113, 108, 1)',
+                            'rgba(249, 115, 22, 1)',
+                            'rgba(14, 165, 233, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(2) + ' CC';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Kapasitas Mesin (CC)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateSimulator() {
+                const modValue = parseFloat(modSlider.value);
+                modValueDisplay.textContent = modValue.toFixed(1);
+
+                const newBore = baseBore + modValue;
+                const newStroke = baseStroke + modValue;
+
+                const ccFromBoreUp = calculateCC(newBore, baseStroke);
+                const ccFromStrokeUp = calculateCC(baseBore, newStroke);
+
+                modChart.data.datasets[0].data = [baseCC, ccFromBoreUp, ccFromStrokeUp];
+                modChart.update();
+
+                const increaseBore = ccFromBoreUp - baseCC;
+                const increaseStroke = ccFromStrokeUp - baseCC;
+                
+                modSummary.innerHTML = `Dengan penambahan <strong>${modValue.toFixed(1)} mm</strong>: <br>
+                - <strong>Bore Up</strong> menambah <strong>${increaseBore.toFixed(2)} CC</strong>. <br>
+                - <strong>Stroke Up</strong> menambah <strong>${increaseStroke.toFixed(2)} CC</strong>. <br>
+                <span class="font-bold mt-2 block">${increaseBore > increaseStroke ? 'Bore Up terbukti lebih efektif!' : (increaseStroke > increaseBore ? 'Stroke Up lebih efektif!' : 'Efeknya sama.')}</span>`;
+            }
+
+            modSlider.addEventListener('input', updateSimulator);
+            
+            updateCalculator();
+            updateSimulator();
+
+            document.querySelectorAll('.accordion-header').forEach(button => {
+                button.addEventListener('click', () => {
+                    const accordionContent = button.nextElementSibling;
+                    const accordionIcon = button.querySelector('span:last-child');
+                    
+                    button.parentElement.classList.toggle('open');
+
+                    if (button.parentElement.classList.contains('open')) {
+                        accordionContent.style.display = 'block';
+                        accordionIcon.textContent = '-';
+                    } else {
+                        accordionContent.style.display = 'none';
+                         accordionIcon.textContent = '+';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
